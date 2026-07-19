@@ -11,36 +11,42 @@
             background-color: #fff0f3;
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
+        }
+        /* බටන් දුවන සීමාව Card එක ඇතුළට විතරක් කොටු කරනවා */
+        .card-container {
             position: relative;
+            overflow: hidden; /* බටන් Card එකෙන් එලියට පනින එක නවත්තනවා */
         }
         .run-btn {
-            transition: all 0.12s ease-out; /* තවත් වේගයෙන් සහ smoothව පනින්න */
             position: absolute;
+            transition: all 0.1s ease-out;
             white-space: nowrap;
         }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-center items-center relative select-none">
+<body class="h-screen w-screen flex flex-col justify-center items-center relative select-none p-4">
 
-    <!-- Question Card -->
-    <div id="questionCard" class="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-[#ffccd5] text-center max-w-sm w-[90%] z-10 transition-all">
-        <div class="text-6xl mb-4 animate-bounce">🤖💖</div>
-        <h1 class="text-2xl font-bold text-[#4a304d] mb-2">System Inquiry:</h1>
-        <p class="text-lg text-[#d81159] font-semibold mb-8">Oya mata adareyi da? 🥺👉👈</p>
+    <!-- Question Card (බටන් දුවන්නේ මේ කොටුව ඇතුළේ විතරයි) -->
+    <div id="questionCard" class="card-container bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-[#ffccd5] text-center w-full max-w-sm h-[380px] flex flex-col justify-between z-10">
+        <div>
+            <div class="text-6xl mb-4 animate-bounce">🤖💖</div>
+            <h1 class="text-2xl font-bold text-[#4a304d] mb-2">System Inquiry:</h1>
+            <p class="text-lg text-[#d81159] font-semibold">Oya mata adareyi da? 🥺👉👈</p>
+        </div>
         
-        <!-- Button Container -->
-        <div class="h-16 w-full flex justify-center gap-4 relative">
-            <button id="btnYes" class="run-btn bg-[#d81159] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer left-[10%] top-2">
+        <!-- බටන් සෙල්ලම් දාන නියමිත Area එක -->
+        <div id="buttonArea" class="h-48 w-full relative border border-dashed border-rose-100 rounded-2xl bg-rose-50/30 overflow-hidden">
+            <button id="btnYes" class="run-btn bg-[#d81159] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer left-[15%] top-[35%]">
                 Ow 😍
             </button>
-            <button id="btnNo" class="run-btn bg-[#8f2d56] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer right-[10%] top-2">
+            <button id="btnNo" class="run-btn bg-[#8f2d56] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer right-[15%] top-[35%]">
                 Na 😭
             </button>
         </div>
     </div>
 
     <!-- Success Card (Ow එබුවොත්) -->
-    <div id="successCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-green-200 text-center max-w-sm w-[90%] z-10 hidden">
+    <div id="successCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-green-200 text-center w-full max-w-sm z-10 hidden">
         <div class="text-6xl mb-4">💖✨</div>
         <h1 class="text-2xl font-bold text-green-600 mb-4">Yayyy! 👑</h1>
         <p class="text-lg text-[#4a304d] font-medium leading-relaxed">
@@ -49,7 +55,7 @@
     </div>
 
     <!-- Smart Row Card (Na එබුවොත්) -->
-    <div id="smartCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-pink-200 text-center max-w-sm w-[90%] z-10 hidden">
+    <div id="smartCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-pink-200 text-center w-full max-w-sm z-10 hidden">
         <div class="text-6xl mb-4">😘👉👈</div>
         <h1 class="text-2xl font-bold text-[#d81159] mb-4">Caught You! 😉</h1>
         <p class="text-lg text-[#4a304d] font-medium leading-relaxed">
@@ -60,6 +66,7 @@
     <script>
         const btnYes = document.getElementById('btnYes');
         const btnNo = document.getElementById('btnNo');
+        const buttonArea = document.getElementById('buttonArea');
         const questionCard = document.getElementById('questionCard');
         const successCard = document.getElementById('successCard');
         const smartCard = document.getElementById('smartCard');
@@ -72,16 +79,18 @@
             }
 
             if (firstInteractedButton === id) {
-                // Screen එකේ නියම Size එක ගන්නවා
-                const pad = 30; // Screen එක අයිනටම ගිහින් හැංගෙන එක නවත්තන්න පොඩි ඉඩක් (Padding)
-                const maxX = window.innerWidth - button.offsetWidth - pad;
-                const maxY = window.innerHeight - button.offsetHeight - pad;
+                // දැන් බටන් එකේ සීමාව මනින්නේ මුළු Screen එකෙන් නෙමෙයි, අර Button Area කොටුවෙන් විතරයි!
+                const areaWidth = buttonArea.clientWidth;
+                const areaHeight = buttonArea.clientHeight;
 
-                // 0 ඉඳන් උපරිම සීමාව ඇතුලත විතරක් Random තැනක් තෝරනවා
+                const pad = 10; // කොටුවේ අයිනටම නොයා ඉන්න padding එක
+                const maxX = areaWidth - button.offsetWidth - pad;
+                const maxY = areaHeight - button.offsetHeight - pad;
+
                 let randomX = Math.floor(Math.random() * (maxX - pad)) + pad;
                 let randomY = Math.floor(Math.random() * (maxY - pad)) + pad;
 
-                // සීමාවෙන් පිට පනින්න දෙන්නේම නැහැ
+                // සීමාවන් පාලනය
                 if (randomX < pad) randomX = pad;
                 if (randomY < pad) randomY = pad;
 
@@ -96,7 +105,6 @@
             e.preventDefault();
             moveButton(btnYes, 'yes');
         });
-        // Phone වල click/pointer events එකපාරම වැඩ කරන නිසා touchstart එක වගේම මෙතනත් දුවන්න අරිනවා
         btnYes.addEventListener('pointerdown', (e) => {
             if (firstInteractedButton === 'yes') {
                 e.preventDefault();
