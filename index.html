@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 Our Private Memory Vault 📂</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { background-color: #fff0f3; color: #4a304d; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+
+    <!-- Soft Heart Banner -->
+    <header class="bg-gradient-to-r from-[#ffb5a7] to-[#fcd5ce] text-center py-10 shadow-sm border-b-4 border-[#ffb5a7]">
+        <h1 class="text-3xl md:text-5xl font-bold text-white tracking-wide">💖 Our Private Memory Vault 📂</h1>
+        <p class="text-[#8f2d56] italic mt-2 text-sm md:text-base font-medium">Keeping our special beautiful moments forever alive...</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 mt-10">
+        <!-- Memory Input Form -->
+        <section class="bg-white rounded-2xl p-6 shadow-md max-w-xl mx-auto border border-[#ffccd5]">
+            <h2 class="text-xl font-bold text-[#d81159] mb-4 text-center">Add a New Sweet Memory</h2>
+            <form id="memoryForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1 text-[#8f2d56]">Moment Title *</label>
+                    <input type="text" id="title" placeholder="e.g., Our First Date at Beach 🌊" class="w-full px-3 py-2 border rounded-xl bg-rose-50/50 focus:outline-pink-300" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1 text-[#8f2d56]">Little Love Note</label>
+                    <textarea id="description" placeholder="Write what made this moment so special..." class="w-full px-3 py-2 border rounded-xl bg-rose-50/50 h-20 focus:outline-pink-300"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider mb-1 text-[#8f2d56]">Choose Polaroid Photo *</label>
+                    <input type="file" id="fileInput" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-[#ffe5ec] file:text-[#d81159] hover:file:bg-[#ffccd5] cursor-pointer" required>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progressContainer" class="w-full bg-gray-200 rounded-full h-2.5 hidden">
+                    <div id="progressBar" class="bg-[#d81159] h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    <p id="progressText" class="text-center text-xs mt-1 text-[#d81159] font-semibold">Uploading... 0%</p>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-[#d81159] text-white py-3 rounded-xl font-semibold hover:bg-[#c9184a] shadow-md transition-all cursor-pointer">
+                    Save into Vault 🔒
+                </button>
+            </form>
+        </section>
+
+        <!-- Polaroid Memory Grid Display -->
+        <section class="mt-14">
+            <h2 class="text-2xl font-bold text-[#8f2d56] mb-8 text-center">✨ Our Captured Timelines ✨</h2>
+            <div id="memoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                <!-- Memories will load here dynamically -->
+                <p class="text-center text-gray-500 italic col-span-full">Loading our love vault... 💻</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Firebase SDK Modules Setup (തනි file එකක් නිසා මොඩියුල් විදිහට ගන්නේ) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 🔥 ඔයාගේ Firebase Configuration එක මෙතනට දාන්න
+        const firebaseConfig = {
+            apiKey: "AIzaSyDEV-fbnl0WSPfkt1w6H3fTs9wm7A1DDkk",
+            authDomain: "mydigitaldrive.firebaseapp.com",
+            projectId: "mydigitaldrive",
+            storageBucket: "mydigitaldrive.firebasestorage.app",
+            messagingSenderId: "121020166206",
+            appId: "1:121020166206:web:59d5cab3f185e46a37e16f",
+            measurementId: "G-5XPB111BKH"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+        const db = getFirestore(app);
+
+        const form = document.getElementById('memoryForm');
+        const fileInput = document.getElementById('fileInput');
+        const memoriesGrid = document.getElementById('memoriesGrid');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        // 1. Fetch memories from Firebase Firestore on load
+        async function fetchMemories() {
+            memoriesGrid.innerHTML = '';
+            try {
+                const q = query(collection(db, "memories"), orderBy("date", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    memoriesGrid.innerHTML = '<p class="text-center text-gray-500 italic col-span-full">No memories inside the vault yet. Start uploading your love pages! 💕</p>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const memory = doc.data();
+                    const dateFormatted = memory.date ? new Date(memory.date.seconds * 1000).toLocaleDateString() : 'Today';
+                    
+                    const card = `
+                        <div class="bg-white p-4 pb-8 shadow-xl border border-gray-100 rounded-sm transform hover:rotate-1 hover:scale-105 transition-all duration-300">
+                            <div class="w-full aspect-square relative overflow-hidden bg-gray-100 border border-gray-200">
+                                <img src="${memory.mediaUrl}" alt="${memory.title}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="mt-4">
+                                <h3 class="text-lg font-bold text-[#4a304d] leading-snug">${memory.title}</h3>
+                                <p class="text-xs text-gray-400 mt-1">📅 ${dateFormatted}</p>
+                                ${memory.description ? `<p class="text-sm text-gray-600 mt-2 italic border-t pt-2 border-dashed border-rose-100">"${memory.description}"</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    memoriesGrid.innerHTML += card;
+                });
+            } catch (error) {
+                console.error("Error fetching documents: ", error);
+                memoriesGrid.innerHTML = '<p class="text-center text-red-500 col-span-full">Failed to load vault. check Firestore settings.</p>';
+            }
+        }
+
+        // 2. Upload photo and Save details on submit
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+
+            if (!file || !title) return;
+
+            // UI Changes for Loading
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Locking into Vault...";
+            progressContainer.classList.remove('hidden');
+
+            // Upload image to Firebase Storage
+            const storageRef = ref(storage, `memories/${Date.now()}_${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    progressBar.style.width = progress + '%';
+                    progressText.innerText = `Uploading Your Love Asset... ${Math.round(progress)}%`;
+                }, 
+                (error) => {
+                    alert("Upload failed! Error: " + error.message);
+                    resetForm();
+                }, 
+                async () => {
+                    // Get download URL from storage
+                    const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                    
+                    try {
+                        // Save details into Firestore Database
+                        await addDoc(collection(db, "memories"), {
+                            title: title,
+                            description: description,
+                            mediaUrl: downloadUrl,
+                            date: new Date()
+                        });
+
+                        form.reset();
+                        resetForm();
+                        fetchMemories(); // Refresh list
+                    } catch (e) {
+                        alert("Error saving metadata: " + e.message);
+                        resetForm();
+                    }
+                }
+            );
+        });
+
+        function resetForm() {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Save into Vault 🔒";
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+        }
+
+        // Initial fetch
+        fetchMemories();
+    </script>
+</body>
+</html>
