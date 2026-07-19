@@ -3,20 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💖 A Special Question For You 💖</title>
+    <title>A Special Question For You</title>
+
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="[cdn.jsdelivr.net](https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4)"></script>
+
     <style>
         body {
             background-color: #fff0f3;
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
         }
-        /* බටන් දුවන සීමාව Card එක ඇතුළට විතරක් කොටු කරනවා */
+
+        /* Keeps the running buttons inside the card only */
         .card-container {
             position: relative;
-            overflow: hidden; /* බටන් Card එකෙන් එලියට පනින එක නවත්තනවා */
+            overflow: hidden;
         }
+
         .run-btn {
             position: absolute;
             transition: all 0.1s ease-out;
@@ -24,42 +28,64 @@
         }
     </style>
 </head>
+
 <body class="h-screen w-screen flex flex-col justify-center items-center relative select-none p-4">
 
-    <!-- Question Card (බටන් දුවන්නේ මේ කොටුව ඇතුළේ විතරයි) -->
-    <div id="questionCard" class="card-container bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-[#ffccd5] text-center w-full max-w-sm h-[380px] flex flex-col justify-between z-10">
+    <!-- Question Card -->
+    <div
+        id="questionCard"
+        class="card-container bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-[#ffccd5] text-center w-full max-w-sm h-[380px] flex flex-col justify-between z-10"
+    >
         <div>
             <div class="text-6xl mb-4 animate-bounce">🤖💖</div>
             <h1 class="text-2xl font-bold text-[#4a304d] mb-2">System Inquiry:</h1>
-            <p class="text-lg text-[#d81159] font-semibold">Oya mata adareyi da? 🥺👉👈</p>
+            <p class="text-lg text-[#d81159] font-semibold">
+                Do you love me? 🥺👉👈
+            </p>
         </div>
-        
-        <!-- බටන් සෙල්ලම් දාන නියමිත Area එක -->
-        <div id="buttonArea" class="h-48 w-full relative border border-dashed border-rose-100 rounded-2xl bg-rose-50/30 overflow-hidden">
-            <button id="btnYes" class="run-btn bg-[#d81159] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer left-[15%] top-[35%]">
-                Ow 😍
+
+        <!-- Button play area -->
+        <div
+            id="buttonArea"
+            class="h-48 w-full relative border border-dashed border-rose-100 rounded-2xl bg-rose-50/30 overflow-hidden"
+        >
+            <button
+                id="btnYes"
+                class="run-btn bg-[#d81159] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer left-[15%] top-[35%]"
+            >
+                Yes 😍
             </button>
-            <button id="btnNo" class="run-btn bg-[#8f2d56] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer right-[15%] top-[35%]">
-                Na 😭
+
+            <button
+                id="btnNo"
+                class="run-btn bg-[#8f2d56] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer right-[15%] top-[35%]"
+            >
+                No 😭
             </button>
         </div>
     </div>
 
-    <!-- Success Card (Ow එබුවොත්) -->
-    <div id="successCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-green-200 text-center w-full max-w-sm z-10 hidden">
+    <!-- Success Card: shown if Yes is clicked -->
+    <div
+        id="successCard"
+        class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-green-200 text-center w-full max-w-sm z-10 hidden"
+    >
         <div class="text-6xl mb-4">💖✨</div>
         <h1 class="text-2xl font-bold text-green-600 mb-4">Yayyy! 👑</h1>
         <p class="text-lg text-[#4a304d] font-medium leading-relaxed">
-            Mamath adareyi raththaran oyata... 💖
+            I love you too, my precious one... 💖
         </p>
     </div>
 
-    <!-- Smart Row Card (Na එබුවොත්) -->
-    <div id="smartCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-pink-200 text-center w-full max-w-sm z-10 hidden">
+    <!-- Smart Card: shown if No is clicked -->
+    <div
+        id="smartCard"
+        class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-pink-200 text-center w-full max-w-sm z-10 hidden"
+    >
         <div class="text-6xl mb-4">😘👉👈</div>
         <h1 class="text-2xl font-bold text-[#d81159] mb-4">Caught You! 😉</h1>
         <p class="text-lg text-[#4a304d] font-medium leading-relaxed">
-            Man dannawa raththaran oya mata adareyi kiyala... 💕
+            I already know you love me, sweetheart... 💕
         </p>
     </div>
 
@@ -79,18 +105,18 @@
             }
 
             if (firstInteractedButton === id) {
-                // දැන් බටන් එකේ සීමාව මනින්නේ මුළු Screen එකෙන් නෙමෙයි, අර Button Area කොටුවෙන් විතරයි!
+                // The button is limited to moving only inside the button area,
+                // not across the whole screen.
                 const areaWidth = buttonArea.clientWidth;
                 const areaHeight = buttonArea.clientHeight;
 
-                const pad = 10; // කොටුවේ අයිනටම නොයා ඉන්න padding එක
+                const pad = 10;
                 const maxX = areaWidth - button.offsetWidth - pad;
                 const maxY = areaHeight - button.offsetHeight - pad;
 
                 let randomX = Math.floor(Math.random() * (maxX - pad)) + pad;
                 let randomY = Math.floor(Math.random() * (maxY - pad)) + pad;
 
-                // සීමාවන් පාලනය
                 if (randomX < pad) randomX = pad;
                 if (randomY < pad) randomY = pad;
 
@@ -99,18 +125,21 @@
             }
         }
 
-        // --- YES Button Setup ---
+        // YES button setup
         btnYes.addEventListener('mouseenter', () => moveButton(btnYes, 'yes'));
+
         btnYes.addEventListener('touchstart', (e) => {
             e.preventDefault();
             moveButton(btnYes, 'yes');
         });
+
         btnYes.addEventListener('pointerdown', (e) => {
             if (firstInteractedButton === 'yes') {
                 e.preventDefault();
                 moveButton(btnYes, 'yes');
             }
         });
+
         btnYes.addEventListener('click', (e) => {
             if (firstInteractedButton === 'yes') {
                 e.preventDefault();
@@ -121,18 +150,21 @@
             }
         });
 
-        // --- NO Button Setup ---
+        // NO button setup
         btnNo.addEventListener('mouseenter', () => moveButton(btnNo, 'no'));
+
         btnNo.addEventListener('touchstart', (e) => {
             e.preventDefault();
             moveButton(btnNo, 'no');
         });
+
         btnNo.addEventListener('pointerdown', (e) => {
             if (firstInteractedButton === 'no') {
                 e.preventDefault();
                 moveButton(btnNo, 'no');
             }
         });
+
         btnNo.addEventListener('click', (e) => {
             if (firstInteractedButton === 'no') {
                 e.preventDefault();
@@ -143,5 +175,6 @@
             }
         });
     </script>
+
 </body>
 </html>
