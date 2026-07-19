@@ -10,25 +10,23 @@
         body {
             background-color: #fff0f3;
             font-family: 'Poppins', sans-serif;
-            overflow: hidden; /* Screen එකෙන් පිටට දුවන එක නවත්තන්න */
+            overflow: hidden;
         }
         .run-btn {
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             position: absolute;
         }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col justify-center items-center relative select-none">
 
-    <!-- Main Card -->
-    <div class="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-[#ffccd5] text-center max-w-sm z-10">
-        <!-- Cute Robot / Heart Emoji -->
+    <!-- Question Card (මුලින්ම පේන එක) -->
+    <div id="questionCard" class="bg-white/80 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-[#ffccd5] text-center max-w-sm z-10">
         <div class="text-6xl mb-4 animate-bounce">🤖💖</div>
-        
         <h1 class="text-2xl font-bold text-[#4a304d] mb-2">System Inquiry:</h1>
         <p class="text-lg text-[#d81159] font-semibold mb-8">Oya mata adareyi da? 🥺👉👈</p>
         
-        <!-- Container just to keep space, buttons are absolute -->
+        <!-- Button Area -->
         <div class="h-16 w-full flex justify-center gap-4 relative">
             <button id="btnYes" class="run-btn bg-[#d81159] text-white px-8 py-3 rounded-full font-bold shadow-md cursor-pointer left-4 top-2">
                 Ow 😍
@@ -39,47 +37,76 @@
         </div>
     </div>
 
-    <!-- Background decorative floating hearts -->
-    <div class="absolute inset-0 pointer-events-none opacity-20 text-3xl">
-        <span class="absolute top-10 left-10">❤️</span>
-        <span class="absolute bottom-20 left-20">💖</span>
-        <span class="absolute top-1/4 right-20">💗</span>
-        <span class="absolute bottom-10 right-10">✨</span>
+    <!-- Success Card (Ow එබුවොත් එන එක) -->
+    <div id="successCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-green-200 text-center max-w-sm z-10 hidden">
+        <div class="text-6xl mb-4">💖✨</div>
+        <h1 class="text-2xl font-bold text-green-600 mb-4">Yayyy! 👑</h1>
+        <p class="text-lg text-[#4a304d] font-medium leading-relaxed">
+            Mamath adareyi raththaran oyata... 💖
+        </p>
+    </div>
+
+    <!-- Smart Row Card (Na එබුවොත් එන එක) -->
+    <div id="smartCard" class="bg-white/90 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-pink-200 text-center max-w-sm z-10 hidden">
+        <div class="text-6xl mb-4">😘👉👈</div>
+        <h1 class="text-2xl font-bold text-[#d81159] mb-4">Caught You! 😉</h1>
+        <p class="text-lg text-[#4a304d] font-medium leading-relaxed">
+            Man dannawa raththaran oya mata adareyi kiyala... 💕
+        </p>
     </div>
 
     <script>
         const btnYes = document.getElementById('btnYes');
         const btnNo = document.getElementById('btnNo');
+        const questionCard = document.getElementById('questionCard');
+        const successCard = document.getElementById('successCard');
+        const smartCard = document.getElementById('smartCard');
 
-        // Button එකක් උඩට Mouse එක ගෙනිච්චම හෝ Touch කරපු ගමන් දුවන්න හදන Function එක
-        function moveButton(button) {
-            // Screen එකේ size එක ගන්නවා
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
+        // කවුරුහරි මුලින්ම Touch කරපු හෝ Hover කරපු Button එක මේකෙන් සටහන් කරගන්නවා
+        let firstInteractedButton = null;
 
-            // Button එකට යන්න පුළුවන් උපරිම X සහ Y සීමාවන් (Card එක උඩටම නොයන විදිහට)
-            const randomX = Math.floor(Math.random() * (screenWidth - button.offsetWidth - 40)) + 20;
-            const randomY = Math.floor(Math.random() * (screenHeight - button.offsetHeight - 40)) + 20;
+        function moveButton(button, id) {
+            // මුලින්ම touch/hover කරපු එක සලකුණු කරගන්නවා
+            if (!firstInteractedButton) {
+                firstInteractedButton = id;
+            }
 
-            // කෝඩ් එකෙන් Button එක අලුත් තැනකට පන්නනවා
-            button.style.left = `${randomX}px`;
-            button.style.top = `${randomY}px`;
+            // මුලින්ම අල්ලපු button එක නම් විතරක් දිවන්න ඇරපන්!
+            if (firstInteractedButton === id) {
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+
+                const randomX = Math.floor(Math.random() * (screenWidth - button.offsetWidth - 40)) + 20;
+                const randomY = Math.floor(Math.random() * (screenHeight - button.offsetHeight - 40)) + 20;
+
+                button.style.left = `${randomX}px`;
+                button.style.top = `${randomY}px`;
+            }
         }
 
-        // --- "Ow" Button එකට සෙල්ලම දාමු ---
-        btnYes.addEventListener('mouseenter', () => moveButton(btnYes));
+        // --- Event Listeners for YES Button ---
+        btnYes.addEventListener('mouseenter', () => moveButton(btnYes, 'yes'));
         btnYes.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Phone එකේදී click වීම වලක්වන්න
-            moveButton(btnYes);
+            e.preventDefault();
+            moveButton(btnYes, 'yes');
+        });
+        btnYes.addEventListener('click', () => {
+            // මුලින්ම "Na" පස්සේ දුවලා දුවලා ඇවිත් "Ow" එබුවොත්
+            questionCard.classList.add('hidden');
+            successCard.classList.remove('hidden');
         });
 
-        // --- "Na" Button එකට සෙල්ලම දාමු ---
-        btnNo.addEventListener('mouseenter', () => moveButton(btnNo));
+        // --- Event Listeners for NO Button ---
+        btnNo.addEventListener('mouseenter', () => moveButton(btnNo, 'no'));
         btnNo.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            moveButton(btnNo);
+            moveButton(btnNo, 'no');
+        });
+        btnNo.addEventListener('click', () => {
+            // මුලින්ම "Ow" පස්සේ දුවලා දුවලා ඇවිත් "Na" එබුවොත්
+            questionCard.classList.add('hidden');
+            smartCard.classList.remove('hidden');
         });
     </script>
-
 </body>
 </html>
